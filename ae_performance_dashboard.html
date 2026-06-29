@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Thameswood NHS FT — A&amp;E Performance Dashboard</title>
+<script src="vendor/chart.umd.js"></script>
+<style>
+  :root {
+    --navy: #1F3864;
+    --navy-light: #2E5395;
+    --bg: #F4F6F9;
+    --card: #FFFFFF;
+    --border: #E1E5EC;
+    --text: #1A1A1A;
+    --muted: #6B7280;
+    --red: #C0392B;
+    --amber: #D98E04;
+    --green: #2E8B57;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .topbar {
+    background: var(--navy);
+    color: white;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .topbar h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  .topbar .sub { font-size: 12.5px; color: #C9D4E8; }
+  .container { padding: 22px 28px 40px; max-width: 1300px; margin: 0 auto; }
+  .filters {
+    display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center;
+  }
+  .filters label { font-size: 12px; color: var(--muted); margin-right: 4px; }
+  select {
+    border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px;
+    font-size: 13px; background: white; color: var(--text);
+  }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .kpi-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 18px; position: relative; overflow: hidden;
+  }
+  .kpi-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+  .kpi-card .value { font-size: 30px; font-weight: 700; margin-top: 4px; color: var(--navy); }
+  .kpi-card .delta { font-size: 12.5px; margin-top: 4px; font-weight: 600; }
+  .kpi-card .target { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .delta.bad { color: var(--red); }
+  .delta.good { color: var(--green); }
+  .bar-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+  .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px;
+  }
+  .card h2 { font-size: 14px; margin: 0 0 12px; color: var(--navy); font-weight: 600; }
+  .card .note { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; }
+  tr:hover { background: #F8F9FB; }
+  .flag-red { color: var(--red); font-weight: 600; }
+  .flag-amber { color: var(--amber); font-weight: 600; }
+  .footer-note {
+    font-size: 11px; color: var(--muted); margin-top: 24px; border-top: 1px solid var(--border);
+    padding-top: 12px; line-height: 1.6;
+  }
+  canvas { max-height: 300px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>A&amp;E Performance Dashboard — Thameswood NHS FT</h1>
+    <div class="sub">Urgent &amp; Emergency Care Programme | Illustrative case study</div>
+  </div>
+  <div class="sub">Last refreshed: 29 Jun 2026 · FY 2025/26 (Apr–Mar)</div>
+</div>
+
+<div class="container">
+
+  <div class="filters">
+    <label>Period:</label>
+    <select id="periodFilter"><option>FY 2025/26 (Apr–Mar)</option></select>
+    <label>Metric focus:</label>
+    <select id="metricFilter">
+      <option value="breach">4-hour breach rate</option>
+      <option value="trolley">12-hour trolley waits</option>
+      <option value="admission">Admission rate</option>
+    </select>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="bar-accent" style="background:var(--red)"></div>
+      <div class="label">4-Hour Breach Rate (FY avg)</div>
+      <div class="value">36.4%</div>
+      <div class="delta bad">▲ vs 5% target ceiling</div>
+      <div class="target">NHS standard: ≤5% breach (95% within 4hrs)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="bar-accent" style="background:var(--amber)"></div>
+      <div class="label">12-Hr Trolley Waits (peak month)</div>
+      <div class="value">244</div>
+      <div class="delta bad">▲ 352% vs Jul-25 low (54)</div>
+      <div class="target">Nov-2025 — worst month in period</div>
+    </div>
+    <div class="kpi-card">
+      <div class="bar-accent" style="background:var(--navy-light)"></div>
+      <div class="label">Total Attendances (FY)</div>
+      <div class="value">82,141</div>
+      <div class="delta good">Avg 225/day across the year</div>
+      <div class="target">Peak month: Nov-2025 (7,865)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="bar-accent" style="background:var(--green)"></div>
+      <div class="label">Nursing Vacancy (FY avg)</div>
+      <div class="value">7.3%</div>
+      <div class="delta bad">vs 6.7% NHS national average</div>
+      <div class="target">Peaked at 8.2% in Nov-2025</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>4-Hour Breach Rate vs Attendance Volume (Apr 2025 – Mar 2026)</h2>
+      <canvas id="trendChart"></canvas>
+      <div class="note">Breach rate climbs in step with attendance volume from Sep–Nov 2025, consistent with seasonal winter pressure reported nationally by NHS England.</div>
+    </div>
+    <div class="card">
+      <h2>12-Hour Trolley Waits by Month</h2>
+      <canvas id="trolleyChart"></canvas>
+      <div class="note">Trolley waits rise disproportionately to attendance growth in winter months — a downstream bed-availability signal, not purely a front-door volume issue.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2>Monthly Performance Detail</h2>
+    <table id="dataTable">
+      <thead>
+        <tr><th>Month</th><th>Attendances</th><th>Breach %</th><th>12-Hr Waits</th><th>Admission Rate</th><th>Nursing Vacancy</th><th>Status</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="note">Status flags: months breaching &gt;40% are flagged Red; 30–40% flagged Amber; below 30% shown as standard. Thresholds set for illustration based on the FY's own distribution, not an official NHS escalation policy.</div>
+  </div>
+
+  <div class="footer-note">
+    <strong>Data note:</strong> National 4-hour breach rate and attendance trend figures referenced for calibration are drawn from NHS England statistics as reported in the House of Commons Library briefing "NHS key statistics: England" and the Nuffield Trust QualityWatch NHS Performance Dashboard (both accessed June 2026). Trust-level monthly figures shown here are an illustrative dataset modelled around those published national trends for portfolio demonstration purposes — see <code>data/data_dictionary.md</code> in the project repository for full methodology and sourcing. This is not an official NHS England or NHS Trust publication.
+  </div>
+
+</div>
+
+<script>
+const data = [
+  {month:"Apr-25", attendances:6450, breach:31.6, trolley:82, admission:22.2, vacancy:6.9},
+  {month:"May-25", attendances:6465, breach:32.5, trolley:84, admission:21.8, vacancy:6.8},
+  {month:"Jun-25", attendances:6128, breach:30.6, trolley:66, admission:21.5, vacancy:6.6},
+  {month:"Jul-25", attendances:6198, breach:29.3, trolley:54, admission:21.0, vacancy:6.5},
+  {month:"Aug-25", attendances:6398, breach:31.2, trolley:70, admission:21.7, vacancy:6.7},
+  {month:"Sep-25", attendances:6708, breach:35.0, trolley:106, admission:23.1, vacancy:7.1},
+  {month:"Oct-25", attendances:7465, breach:40.9, trolley:183, admission:24.8, vacancy:7.8},
+  {month:"Nov-25", attendances:7865, breach:44.3, trolley:244, admission:25.6, vacancy:8.2},
+  {month:"Dec-25", attendances:6622, breach:42.3, trolley:182, admission:24.5, vacancy:7.9},
+  {month:"Jan-26", attendances:6998, breach:39.0, trolley:136, admission:23.4, vacancy:7.4},
+  {month:"Feb-26", attendances:6579, breach:37.9, trolley:112, admission:22.8, vacancy:7.0},
+  {month:"Mar-26", attendances:7265, breach:40.8, trolley:163, admission:24.1, vacancy:7.3},
+];
+
+const navy = "#1F3864", navyLight="#2E5395", red="#C0392B", amber="#D98E04";
+
+new Chart(document.getElementById('trendChart'), {
+  type: 'bar',
+  data: {
+    labels: data.map(d=>d.month),
+    datasets: [
+      { type:'line', label:'4-Hr Breach %', data: data.map(d=>d.breach), borderColor: red, backgroundColor: red, yAxisID:'y1', tension:.3, pointRadius:3 },
+      { type:'bar', label:'Attendances', data: data.map(d=>d.attendances), backgroundColor:'#C9D4E8', yAxisID:'y2' },
+    ]
+  },
+  options: {
+    responsive:true,
+    interaction:{mode:'index', intersect:false},
+    scales: {
+      y1: { type:'linear', position:'left', title:{display:true,text:'Breach %'}, min:0, max:50 },
+      y2: { type:'linear', position:'right', title:{display:true,text:'Attendances'}, grid:{drawOnChartArea:false} },
+    },
+    plugins: { legend: { position:'bottom', labels:{boxWidth:12, font:{size:11}} } }
+  }
+});
+
+new Chart(document.getElementById('trolleyChart'), {
+  type:'bar',
+  data: {
+    labels: data.map(d=>d.month),
+    datasets: [{ label:'12-Hr Trolley Waits', data: data.map(d=>d.trolley),
+      backgroundColor: data.map(d=> d.trolley>180? red : d.trolley>100? amber : navyLight) }]
+  },
+  options: {
+    responsive:true,
+    plugins:{ legend:{display:false} },
+    scales: { y: { title:{display:true, text:'Cases'} } }
+  }
+});
+
+const tbody = document.querySelector('#dataTable tbody');
+data.forEach(d => {
+  const status = d.breach > 40 ? '<span class="flag-red">● Red</span>' : d.breach > 30 ? '<span class="flag-amber">● Amber</span>' : 'Standard';
+  tbody.innerHTML += `<tr>
+    <td>${d.month}</td><td>${d.attendances.toLocaleString()}</td><td>${d.breach}%</td>
+    <td>${d.trolley}</td><td>${d.admission}%</td><td>${d.vacancy}%</td><td>${status}</td>
+  </tr>`;
+});
+</script>
+</body>
+</html>
