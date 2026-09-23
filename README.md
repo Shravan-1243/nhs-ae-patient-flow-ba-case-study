@@ -37,9 +37,3 @@ The national-level statistics cited throughout (36.2% breach rate, 7.2 million w
 ## Tools used
 
 `SQL` · `Python (pandas)` · `Power BI-style dashboarding (HTML/Chart.js for portfolio portability)` · `Microsoft Word / BRD documentation` · `Excel (stakeholder & RACI mapping)` · `BPMN-style process mapping`
-
-## About me
-
-I'm a Business Analyst based in London (MSc Data Science & Analytics, University of Hertfordshire; MBCS), with prior experience as a Data Analyst at NielsenIQ. I'm currently completing the IBM Business Analyst Professional Certificate ahead of IIBA ECBA. Open to BA/Data Analyst contract, freelance, and interim roles in the UK.
-
-[LinkedIn](#) · [Portfolio](#) · [Other projects](#)
